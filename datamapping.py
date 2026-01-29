@@ -6,13 +6,11 @@ from pathlib import Path
 
 # Configuración de página
 st.set_page_config(
-    page_title="Data Mapping Tool",
-    page_icon="🗺️",
     layout="wide"
 )
 
 # Título principal
-st.title("🗺️ Data Mapping Tool")
+st.title("Data Mapping")
 st.markdown("---")
 
 st.header("Mapeo de Datos CSV a Esquemas")
@@ -30,7 +28,7 @@ if not json_files:
     st.stop()
 
 # Selector de esquema
-schema_names = [f.name for f in json_files]
+schema_names = ["--Selecciones esquema--"] + [f.name for f in json_files]
 selected_schema = st.selectbox(
     "Selecciona un esquema:",
     schema_names,
@@ -38,7 +36,7 @@ selected_schema = st.selectbox(
 )
 
 # Cargar el esquema seleccionado
-if selected_schema:
+if selected_schema != "--Selecciones esquema--":
     schema_path = current_dir / selected_schema
     with open(schema_path, 'r', encoding='utf-8') as f:
         schema = json.load(f)
@@ -106,7 +104,7 @@ if uploaded_file is not None:
             st.metric("Tamaño", f"{uploaded_file.size / 1024:.2f} KB")
         
         # Mostrar columnas disponibles
-        with st.expander(f"📋 Ver columnas disponibles ({len(df_source.columns)} columnas)"):
+        with st.expander(f"Ver columnas disponibles ({len(df_source.columns)} columnas)"):
             st.write(", ".join([f"`{col}`" for col in df_source.columns]))
         
         # Preview de datos
@@ -117,7 +115,7 @@ if uploaded_file is not None:
         st.error(f"Error al cargar el archivo: {str(e)}")
         st.stop()
 else:
-    st.info("👆 Sube un archivo CSV para continuar")
+    st.info("Sube un archivo CSV para continuar")
 
 st.markdown("---")
 
