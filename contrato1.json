@@ -1,0 +1,57 @@
+{
+  "contract_name": "Qustom Core Banking v1",
+  "version": "1.0",
+  "fields": [
+    {
+      "target_field": "customer_id",
+      "required": true,
+      "type": "string",
+      "description": "ID único del cliente"
+    },
+    {
+      "target_field": "product_id",
+      "required": true,
+      "type": "string",
+      "description": "ID del producto"
+    },
+    {
+      "target_field": "product_type",
+      "required": true,
+      "type": "enum",
+      "values": ["account", "card", "loan"],
+      "description": "Tipo de producto"
+    },
+    {
+      "target_field": "opened_at",
+      "required": false,
+      "type": "date",
+      "description": "Fecha de apertura"
+    },
+    {
+      "target_field": "status",
+      "required": false,
+      "type": "enum",
+      "values": ["active", "inactive", "closed"],
+      "description": "Estado del producto"
+    },
+    {
+      "target_field": "balance",
+      "required": false,
+      "type": "float",
+      "description": "Saldo actual"
+    },
+    {
+      "target_field": "currency",
+      "required": false,
+      "type": "enum",
+      "values": ["ARS", "USD", "EUR"],
+      "description": "Moneda"
+    },
+    {
+      "target_field": "last_update_at",
+      "required": false,
+      "type": "date",
+      "description": "Última fecha de actualización"
+    }
+  ]
+}
