@@ -19,12 +19,19 @@ st.write("Sube un archivo CSV y mapea sus columnas a un esquema predefinido.")
 # ===== SECCIÓN 1: SELECCIÓN DE ESQUEMA =====
 st.subheader("1️⃣ Selecciona el Esquema de Destino")
 
-# Buscar archivos JSON en el directorio actual
+# Buscar archivos JSON en la carpeta contratos
 current_dir = Path(__file__).parent
-json_files = list(current_dir.glob("*.json"))
+contracts_dir = current_dir / "contratos"
+
+# Verificar si existe la carpeta contratos
+if not contracts_dir.exists():
+    st.error("No se encontró la carpeta 'contratos' en el directorio del proyecto.")
+    st.stop()
+
+json_files = list(contracts_dir.glob("*.json"))
 
 if not json_files:
-    st.error("No se encontraron archivos de esquema (.json) en el directorio.")
+    st.error("No se encontraron archivos de esquema (.json) en la carpeta 'contratos'.")
     st.stop()
 
 # Selector de esquema
@@ -37,7 +44,7 @@ selected_schema = st.selectbox(
 
 # Cargar el esquema seleccionado
 if selected_schema != "--Selecciones esquema--":
-    schema_path = current_dir / selected_schema
+    schema_path = contracts_dir / selected_schema
     with open(schema_path, 'r', encoding='utf-8') as f:
         schema = json.load(f)
     
@@ -205,5 +212,117 @@ if uploaded_file is not None and selected_schema:
     st.session_state['mappings'] = mappings
     st.session_state['fields'] = fields
     st.session_state['df_source'] = df_source
+    
+    st.markdown("---")
+    
+    # ===== SECCIÓN 4: VALIDACIÓN DE MAPEOS =====
+    st.subheader("4️⃣ Validación de Mapeos")
+    
+    # Validar mapeos
+    validation_errors = []
+    validation_warnings = []
+    
+    # Verificar campos requeridos
+    for field in required_fields:
+        field_name = field['target_field']
+        mapped_column = mappings.get(field_name, "-- Sin mapear --")
+        
+        if mapped_column == "-- Sin mapear --":
+            validation_errors.append(f"❌ **{field_name}** (requerido) no está mapeado")
+    
+    # Verificar campos opcionales sin mapear
+    for field in optional_fields:
+        field_name = field['target_field']
+        mapped_column = mappings.get(field_name, "-- Sin mapear --")
+        
+        if mapped_column == "-- Sin mapear --":
+            validation_warnings.append(f"⚠️ **{field_name}** (opcional) no está mapeado")
+    
+    # Mostrar resultado de validación
+    if validation_errors:
+        st.error("**Errores encontrados:**")
+        for error in validation_errors:
+            st.markdown(error)
+        st.error("⛔ No se puede exportar hasta que todos los campos requeridos estén mapeados.")
+        mapping_valid = False
+    else:
+        st.success("✅ Todos los campos requeridos están mapeados correctamente")
+        mapping_valid = True
+    
+    # Mostrar advertencias
+    if validation_warnings:
+        with st.expander(f"⚠️ Advertencias ({len(validation_warnings)})"):
+            for warning in validation_warnings:
+                st.markdown(warning)
+            st.info("Los campos opcionales sin mapear tendrán valores vacíos en el resultado.")
+    
+    # Resumen de mapeo
+    mapped_count = sum(1 for v in mappings.values() if v != "-- Sin mapear --")
+    total_count = len(mappings)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Campos Mapeados", f"{mapped_count}/{total_count}")
+    with col2:
+        st.metric("Errores", len(validation_errors))
+    with col3:
+        st.metric("Advertencias", len(validation_warnings))
+    
+    # Guardar estado de validación
+    st.session_state['mapping_valid'] = mapping_valid
+
+st.markdown("---")
+
+# ===== SECCIÓN 5: EXPORTAR CSV TRANSFORMADO =====
+if uploaded_file is not None and selected_schema and st.session_state.get('mapping_valid', False):
+    st.subheader("5️⃣ Exportar Datos Transformados")
+    
+    # Generar DataFrame transformado
+    st.write("**Generar archivo CSV con el esquema destino:**")
+    
+    # Crear DataFrame vacío con las columnas del esquema
+    df_transformed = pd.DataFrame()
+    
+    # Aplicar mapeos
+    for field in fields:
+        target_field = field['target_field']
+        source_column = mappings.get(target_field, "-- Sin mapear --")
+        
+        if source_column != "-- Sin mapear --":
+            # Copiar datos de la columna origen
+            df_transformed[target_field] = df_source[source_column]
+        else:
+            # Campo sin mapear: crear columna vacía
+            df_transformed[target_field] = ""
+    
+    # Preview del resultado
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.write("**Preview del CSV transformado (primeras 5 filas):**")
+        st.dataframe(df_transformed.head(5), use_container_width=True)
+    
+    with col2:
+        st.metric("Filas totales", len(df_transformed))
+        st.metric("Columnas", len(df_transformed.columns))
+    
+    # Generar CSV para descarga
+    csv_data = df_transformed.to_csv(index=False)
+    
+    # Botón de descarga
+    st.download_button(
+        label="⬇️ Descargar CSV Transformado",
+        data=csv_data,
+        file_name=f"transformed_{uploaded_file.name}",
+        mime="text/csv",
+        help="Descarga el archivo CSV con las columnas mapeadas al esquema seleccionado",
+        use_container_width=True
+    )
+    
+    st.success("✅ CSV listo para descargar")
+    
+elif uploaded_file is not None and selected_schema and not st.session_state.get('mapping_valid', False):
+    st.subheader("5️⃣ Exportar Datos Transformados")
+    st.warning("⚠️ Completa el mapeo de todos los campos requeridos para poder exportar.")
 
 st.markdown("---")
