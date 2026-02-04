@@ -1,0 +1,11 @@
+client_id,first_name,last_name,email,phone,country,city,identity_number,is_pep,signup_date,status
+1,John,Doe,john.doe@example.com,+1-555-0101,USA,New York,US-45987231,false,2023-01-15,active
+2,María,González,maria.gonzalez@example.com,+34-600-123456,Spain,Madrid,ES-78345912,false,2023-02-03,active
+3,Liam,OConnor,liam.oconnor@example.com,+353-85-1234567,Ireland,Dublin,IE-99213456,false,2023-02-20,inactive
+4,Ana,Silva,ana.silva@example.com,+55-11-91234-5678,Brazil,São Paulo,BR-55123987,true,2023-03-08,active
+5,Lucas,Martin,lucas.martin@example.com,+33-6-12-34-56-78,France,Paris,FR-84739210,false,2023-03-25,active
+6,Sofia,Rossi,sofia.rossi@example.com,+39-347-1234567,Italy,Milan,IT-67234598,false,2023-04-02,pending
+7,Michael,Brown,michael.brown@example.com,+1-555-0199,USA,Chicago,US-99871234,false,2023-04-18,active
+8,Valentina,Pérez,valentina.perez@example.com,+54-9-11-2345-6789,Argentina,Buenos Aires,AR-40123987,true,2023-05-01,inactive
+9,Noah,Schmidt,noah.schmidt@example.com,+49-151-12345678,Germany,Berlin,DE-58392017,false,2023-05-12,active
+10,Emily,Chen,emily.chen@example.com,+86-138-0013-8000,China,Shanghai,CN-31092845,false,2023-05-30,active
